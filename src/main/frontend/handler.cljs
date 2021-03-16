@@ -17,13 +17,14 @@
             [frontend.handler.file :as file-handler]
             [frontend.handler.editor :as editor-handler]
             [frontend.handler.ui :as ui-handler]
-            [frontend.handler.export :as export-handler]
             [frontend.handler.web.nfs :as nfs]
+            [frontend.fs.watcher-handler :as fs-watcher-handler]
             [frontend.ui :as ui]
             [goog.object :as gobj]
             [frontend.idb :as idb]
             [lambdaisland.glogi :as log]
-            [frontend.handler.common :as common-handler]))
+            [frontend.handler.common :as common-handler]
+            [electron.listener :as el]))
 
 (defn- watch-for-date!
   []
@@ -105,7 +106,8 @@
                                (fn []
                                  (js/console.error "Failed to request GitHub app tokens."))))
 
-                            (watch-for-date!)))
+                            (watch-for-date!)
+                            (file-handler/watch-for-local-dirs!)))
                          (p/catch (fn [error]
                                     (log/error :db/restore-failed error))))))]
     ;; clear this interval
@@ -122,6 +124,26 @@
   (js/window.addEventListener "online" handle-connection-change)
   (js/window.addEventListener "offline" handle-connection-change))
 
+(defn- get-repos
+  []
+  (let [logged? (state/logged?)
+        me (state/get-me)]
+    (p/let [nfs-dbs (idb/get-nfs-dbs)
+            nfs-dbs (map (fn [db]
+                           {:url db :nfs? true}) nfs-dbs)]
+      (cond
+        logged?
+        (concat
+         nfs-dbs
+         (:repos me))
+
+        (seq nfs-dbs)
+        nfs-dbs
+
+        :else
+        [{:url config/local-repo
+          :example? true}]))))
+
 (defn start!
   [render]
   (let [{:keys [me logged? repos]} (get-me-and-repos)]
@@ -136,24 +158,12 @@
        (notification/show! "Sorry, it seems that your browser doesn't support IndexedDB, we recommend to use latest Chrome(Chromium) or Firefox(Non-private mode)." :error false)
        (state/set-indexedb-support! false)))
 
-    (p/let [nfs-dbs (idb/get-nfs-dbs)
-            nfs-dbs (map (fn [db]
-                           {:url db :nfs? true}) nfs-dbs)]
-      (let [repos (cond
-                    logged?
-                    (concat
-                     nfs-dbs
-                     (:repos me))
-
-                    (seq nfs-dbs)
-                    nfs-dbs
-
-                    :else
-                    [{:url config/local-repo
-                      :example? true}])]
-        (state/set-repos! repos)
-        (restore-and-setup! me repos logged?)))
+    (p/let [repos (get-repos)]
+      (state/set-repos! repos)
+      (restore-and-setup! me repos logged?))
     (reset! db/*sync-search-indice-f search/sync-search-indice!)
     (db/run-batch-txs!)
     (file-handler/run-writes-chan!)
-    (editor-handler/periodically-save!)))
+    (editor-handler/periodically-save!)
+    (when (util/electron?)
+      (el/listen!))))
