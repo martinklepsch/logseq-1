@@ -23,8 +23,8 @@
   []
   (let [win-opts {:width         980
                   :height        700
-                  :frame         win32?
-                  :autoHideMenuBar win32?
+                  :frame         (not mac?)
+                  :autoHideMenuBar (not mac?)
                   :titleBarStyle (if mac? "hidden" nil)
                   :webPreferences
                   {:nodeIntegration         false
