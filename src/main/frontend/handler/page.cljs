@@ -38,8 +38,8 @@
 (defn- get-file-name
   [journal? title]
   (when-let [s (if journal?
-            (date/journal-title->default title)
-            (util/page-name-sanity (string/lower-case title)))]
+                 (date/journal-title->default title)
+                 (util/page-name-sanity (string/lower-case title)))]
     ;; Win10 file path has a length limit of 260 chars
     (util/safe-subs s 0 200)))
 
@@ -428,7 +428,7 @@
   []
   (let [current-length (:journals-length @state/state)]
     (when (< current-length (db/get-journals-length))
-      (state/update-state! :journals-length inc))))
+      (state/set-journals-length! (+ current-length 10)))))
 
 (defn update-public-attribute!
   [page-name value]
@@ -516,8 +516,8 @@
 (defn ls-dir-files!
   []
   (web-nfs/ls-dir-files-with-handler!
-    (fn []
-      (init-commands!))))
+   (fn []
+     (init-commands!))))
 
 
 ;; TODO: add use :file/last-modified-at

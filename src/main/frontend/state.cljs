@@ -38,7 +38,7 @@
     :draw? false
     :db/restoring? nil
 
-    :journals-length 1
+    :journals-length 10
 
     :search/q ""
     :search/result nil
@@ -376,7 +376,7 @@
      ;;                        (remove #(= leader-parent %)))]
      ;;     (prn "followers: " (count followers))
      ;;     ))
-)))
+     )))
 
 (defn get-edit-input-id
   []
