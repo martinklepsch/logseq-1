@@ -97,7 +97,7 @@
                      [:div {:style {:margin-right "8px"}} title]
                       ;; [:div {:style {:position "absolute" :right "8px"}}
                       ;;  icon]
-]]
+                     ]]
           (rum/with-key
             (menu-link new-options child)
             title)))
@@ -287,7 +287,7 @@
         full-height (gobj/get node "scrollHeight")
         scroll-top (gobj/get node "scrollTop")
         client-height (gobj/get node "clientHeight")
-        bottom-reached? (<= (- full-height scroll-top client-height) 100)
+        bottom-reached? (<= (- full-height scroll-top client-height) 400)
         top-reached? (= scroll-top 0)]
     (when (and bottom-reached? on-load)
       (on-load))
