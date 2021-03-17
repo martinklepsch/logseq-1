@@ -1,5 +1,5 @@
 #journals {
-  margin-bottom: 70vh;
+  margin-bottom: 64px;
 
   textarea {
     word-break: break-word;
@@ -11,12 +11,12 @@
     border-top: 1px solid;
     border-top-color: var(--ls-border-color, #738694);
     padding: 48px 0;
-    margin: 24px 0 128px 0;
+    margin: 24px 0;
 
     &:first-child {
       border-top: none;
       padding: 0;
-      min-height: 500px;
+      min-height: 240px;
     }
   }
 }
